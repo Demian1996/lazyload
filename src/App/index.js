@@ -1,15 +1,12 @@
 import React, { Component } from 'react';
 import './index.scss';
-import lazyload from '../lazyload.js';
+import LazyLoad from '../lazyload.js';
 import imgList from './temp';
-
-const Img = lazyload.generateComponent();
 
 class App extends Component {
   componentDidMount() {
-    lazyload.init(1000);
-
-    console.log(lazyload);
+    const object = new LazyLoad('.lazyload', 1000, 300);
+    console.log(object);
   }
   render() {
     return (
@@ -18,11 +15,11 @@ class App extends Component {
           <li className="item">
             <figure>
               <div />
-              <img src="" alt="" />
+              <img className="img lazyload" data-src={x} alt="" />
               <img src="" alt="" />
               <canvas />
             </figure>
-            <Img src={x} />
+            {/* <Img src={x} /> */}
           </li>
         ))}
       </ul>
