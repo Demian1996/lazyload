@@ -14,15 +14,18 @@ class LazyLoad {
     this.className = className;
     this.delay = delay;
     this.rootMargin = rootMargin;
+    this._lazyImageList = document.querySelectorAll(className) || [];
     this._init(className, delay, rootMargin);
   }
 
   _throttle(fn, delay) {
     let startTime = 0;
-    return (...args) => {
+    return () => {
       const currentTime = Date.now();
       if (currentTime - startTime > delay) {
-        setTimeout(fn, delay, ...args);
+        setTimeout(() => {
+          fn.call(this);
+        }, delay);
         startTime = currentTime;
       }
     };
@@ -39,6 +42,12 @@ class LazyLoad {
       default:
         
     }
+  }
+
+  _commonLazyLoad(rootMargin) {
+    this._lazyImageList.forEach(lazyImage => {
+      console.log(lazyImage);
+    })
   }
 
   // 观察者api实现懒加载事件
@@ -64,17 +73,17 @@ class LazyLoad {
   }
 
   _init(className, delay, rootMargin) {
-    this._lazyImageList = document.querySelectorAll(className);
     if ('IntersectionObserver' in window) {
       this._lazyLoadMode = mode.OBSERVER;
       this._lazyLoadListener = (className, delay, rootMargin) => this._observerLazyLoad(className, delay, rootMargin);
       document.addEventListener('DOMContentLoaded', this._lazyLoadListener(className, delay, rootMargin));
     } else {
-      const lazyLoad = this._throttle(this._lazyLoad(className), delay);
-      document.addEventListener('scroll', lazyLoad);
-      document.addEventListener('DOMContentLoaded', lazyLoad);
-      window.addEventListener('resize', lazyLoad);
-      window.addEventListener('orientationchange', lazyLoad);
+      this._lazyLoadMode = mode.COMMON;
+      this._lazyLoadListener = this._throttle(this._commonLazyLoad, 1000); 
+      document.addEventListener('scroll', this._lazyLoadListener);
+      document.addEventListener('DOMContentLoaded', this._lazyLoadListener);
+      window.addEventListener('resize', this._lazyLoadListener);
+      window.addEventListener('orientationchange', this._lazyLoadListener);
     }
   }
 }
