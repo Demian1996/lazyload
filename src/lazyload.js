@@ -38,16 +38,16 @@ class LazyLoad {
         document.removeEventListener('DOMContentLoaded', this._lazyLoadListener);
         break;
       case mode.COMMON:
-        
+        break;
       default:
-        
     }
   }
 
+  // 监听滚动条，计算高度
   _commonLazyLoad(rootMargin) {
     this._lazyImageList.forEach(lazyImage => {
       console.log(lazyImage);
-    })
+    });
   }
 
   // 观察者api实现懒加载事件
@@ -75,11 +75,11 @@ class LazyLoad {
   _init(className, delay, rootMargin) {
     if ('IntersectionObserver' in window) {
       this._lazyLoadMode = mode.OBSERVER;
-      this._lazyLoadListener = (className, delay, rootMargin) => this._observerLazyLoad(className, delay, rootMargin);
-      document.addEventListener('DOMContentLoaded', this._lazyLoadListener(className, delay, rootMargin));
+      this._lazyLoadListener = (className, rootMargin) => this._observerLazyLoad(className, rootMargin);
+      document.addEventListener('DOMContentLoaded', this._lazyLoadListener(className, rootMargin));
     } else {
       this._lazyLoadMode = mode.COMMON;
-      this._lazyLoadListener = this._throttle(this._commonLazyLoad, 1000); 
+      this._lazyLoadListener = this._throttle(this._commonLazyLoad, 1000);
       document.addEventListener('scroll', this._lazyLoadListener);
       document.addEventListener('DOMContentLoaded', this._lazyLoadListener);
       window.addEventListener('resize', this._lazyLoadListener);

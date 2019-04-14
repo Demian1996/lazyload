@@ -1,3 +1,21 @@
+.header {
+  width: 100vw;
+  background: skyblue;
+  
+  img {
+    position: absolute;
+    width: 100%;
+    display: inline-block;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+  img.loaded {
+    opacity: 1;
+  }
+  .small {
+    filter: blur(50px);
+  }
+}
 .container {
   .item {
     width: 200px;
@@ -10,8 +28,11 @@
   }
 }
 
-ul, li {
+body figure,
+ul,
+li {
   padding: 0;
   margin: 0;
   list-style: none;
+  box-sizing: border-box;
 }

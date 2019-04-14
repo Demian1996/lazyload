@@ -351,8 +351,14 @@
 //   }
 // ];
 // console.log(temp.map(x => x.url));
+export const demo = {
+  large: 'https://cdn-images-1.medium.com/max/1800/1*sg-uLNm73whmdOgKlrQdZA.jpeg',
+  small: 'https://cdn-images-1.medium.com/freeze/max/27/1*sg-uLNm73whmdOgKlrQdZA.jpeg?q=20'
+}
 
-export default [ 'https://via.placeholder.com/600/92c952',
+
+export const imgList = [
+  'https://via.placeholder.com/600/92c952',
   'https://via.placeholder.com/600/771796',
   'https://via.placeholder.com/600/24f355',
   'https://via.placeholder.com/600/d32776',
@@ -401,4 +407,5 @@ export default [ 'https://via.placeholder.com/600/92c952',
   'https://via.placeholder.com/600/b4412f',
   'https://via.placeholder.com/600/68e0a8',
   'https://via.placeholder.com/600/2cd88b',
-  'https://via.placeholder.com/600/9e59da' ]
+  'https://via.placeholder.com/600/9e59da'
+];
