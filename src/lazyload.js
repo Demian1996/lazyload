@@ -10,21 +10,23 @@ class LazyLoad {
   _lazyImageObserver = null;
   _lazyLoadListener = null;
 
-  constructor(className = '.lazyload', delay = 1000, rootMargin = 0) {
-    this.className = className;
-    this.delay = delay;
-    this.rootMargin = rootMargin;
-    this._lazyImageList = document.querySelectorAll(className) || [];
-    this._init(className, delay, rootMargin);
+  constructor({ selector = '.lazy-load', className = 'lazy-load', delay = 1000, vMargin = 0, hMargin = 0 }) {
+    this._selector = selector;
+    this._className = className;
+    this._delay = delay;
+    this._vMargin = vMargin;
+    this._hMargin = hMargin;
+    this._lazyImageList = [].slice.call(document.querySelectorAll(selector)) || [];
+    this._init();
   }
 
   _throttle(fn, delay) {
     let startTime = 0;
-    return () => {
+    return (...args) => {
       const currentTime = Date.now();
       if (currentTime - startTime > delay) {
         setTimeout(() => {
-          fn.call(this);
+          fn.call(this, ...args);
         }, delay);
         startTime = currentTime;
       }
@@ -44,46 +46,66 @@ class LazyLoad {
   }
 
   // 监听滚动条，计算高度
-  _commonLazyLoad(rootMargin) {
-    this._lazyImageList.forEach(lazyImage => {
-      console.log(lazyImage);
+  _commonLazyLoad() {
+    this._lazyImageList.forEach((lazyImage, index) => {
+      if (this._isInViewPort(lazyImage)) {
+        this._show(lazyImage);
+        lazyImage.isInViewPort = true;
+      }
     });
+    this._lazyImageList = this._lazyImageList.filter(x => x.isInViewPort !== true);
   }
 
   // 观察者api实现懒加载事件
-  _observerLazyLoad(className, rootMargin) {
+  _observerLazyLoad() {
+    console.log(this._vMargin, this._hMargin);
     const options = {
       root: null,
-      rootMargin: `${rootMargin}px 0px`
+      rootMargin: `${this._vMargin}px ${this._hMargin}px`
     };
     this._lazyImageObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
+      Array.prototype.forEach.call(entries, entry => {
         if (entry.isIntersecting) {
-          let lazyImage = entry.target;
-          lazyImage.src = lazyImage.dataset.src;
-          lazyImage.classList.remove(className);
-          this._lazyImageObserver.unobserve(lazyImage);
+          this._show(entry.target);
+          this._lazyImageObserver.unobserve(entry.target);
         }
       });
     }, options);
 
-    this._lazyImageList.forEach(lazyImage => {
+    Array.prototype.forEach.call(this._lazyImageList, lazyImage => {
       this._lazyImageObserver.observe(lazyImage);
     });
   }
 
-  _init(className, delay, rootMargin) {
+  _show(el) {
+    el.src = el.dataset.src;
+    el.classList.remove(this._className);
+  }
+
+  _isInViewPort(el) {
+    const viewPortHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+    const viewPortWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    const offsetTop = el.offsetTop;
+    const offsetLeft = el.offsetLeft;
+    const scrollTop = document.documentElement.scrollTop;
+    const scrollLeft = document.documentElement.scrollLeft;
+    const top = offsetTop - scrollTop;
+    const left = offsetLeft - scrollLeft;
+    return top <= viewPortHeight + this._vMargin && left <= viewPortWidth + this._hMargin;
+  }
+
+  _init() {
     if ('IntersectionObserver' in window) {
       this._lazyLoadMode = mode.OBSERVER;
-      this._lazyLoadListener = (className, rootMargin) => this._observerLazyLoad(className, rootMargin);
-      document.addEventListener('DOMContentLoaded', this._lazyLoadListener(className, rootMargin));
+      this._lazyLoadListener = this._observerLazyLoad;
+      document.addEventListener('DOMContentLoaded', this._lazyLoadListener.bind(this));
     } else {
       this._lazyLoadMode = mode.COMMON;
-      this._lazyLoadListener = this._throttle(this._commonLazyLoad, 1000);
-      document.addEventListener('scroll', this._lazyLoadListener);
-      document.addEventListener('DOMContentLoaded', this._lazyLoadListener);
-      window.addEventListener('resize', this._lazyLoadListener);
-      window.addEventListener('orientationchange', this._lazyLoadListener);
+      this._lazyLoadListener = this._throttle(this._commonLazyLoad, 500);
+      document.addEventListener('scroll', this._lazyLoadListener.bind(this));
+      document.addEventListener('DOMContentLoaded', this._lazyLoadListener.bind(this));
+      window.addEventListener('resize', this._lazyLoadListener.bind(this));
+      window.addEventListener('orientationchange', this._lazyLoadListener.bind(this));
     }
   }
 }

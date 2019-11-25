@@ -6,7 +6,9 @@ import './index.scss';
 
 class App extends Component {
   componentDidMount() {
-    const object = new LazyLoad('.lazyload', 1000, 300);
+    const object = new LazyLoad({
+      vMargin: 500
+    });
     console.log(object);
   }
   render() {
@@ -19,7 +21,7 @@ class App extends Component {
           {imgList.map(x => (
             <li className='item'>
               <figure>
-                <img className='img lazyload' data-src={x} alt='' />
+                <img className='img lazy-load' data-src={x} alt='' />
               </figure>
             </li>
           ))}
