@@ -40,6 +40,10 @@ class LazyLoad {
         document.removeEventListener('DOMContentLoaded', this._lazyLoadListener);
         break;
       case mode.COMMON:
+        document.removeEventListener('scroll', this._lazyLoadListener);
+        document.removeEventListener('DOMContentLoaded', this._lazyLoadListener);
+        window.removeEventListener('resize', this._lazyLoadListener);
+        window.removeEventListener('orientationchange', this._lazyLoadListener);
         break;
       default:
     }
@@ -47,13 +51,17 @@ class LazyLoad {
 
   // 监听滚动条，计算高度
   _commonLazyLoad() {
+    let hasChanged = false;
     this._lazyImageList.forEach((lazyImage, index) => {
       if (this._isInViewPort(lazyImage)) {
         this._show(lazyImage);
         lazyImage.isInViewPort = true;
+        hasChanged = true;
       }
     });
-    this._lazyImageList = this._lazyImageList.filter(x => x.isInViewPort !== true);
+    if (hasChanged) {
+      this._lazyImageList = this._lazyImageList.filter(x => x.isInViewPort !== true);
+    }
   }
 
   // 观察者api实现懒加载事件
@@ -97,15 +105,15 @@ class LazyLoad {
   _init() {
     if ('IntersectionObserver' in window) {
       this._lazyLoadMode = mode.OBSERVER;
-      this._lazyLoadListener = this._observerLazyLoad;
-      document.addEventListener('DOMContentLoaded', this._lazyLoadListener.bind(this));
+      this._lazyLoadListener = this._observerLazyLoad.bind(this);
+      document.addEventListener('DOMContentLoaded', this._lazyLoadListener);
     } else {
       this._lazyLoadMode = mode.COMMON;
-      this._lazyLoadListener = this._throttle(this._commonLazyLoad, 500);
-      document.addEventListener('scroll', this._lazyLoadListener.bind(this));
-      document.addEventListener('DOMContentLoaded', this._lazyLoadListener.bind(this));
-      window.addEventListener('resize', this._lazyLoadListener.bind(this));
-      window.addEventListener('orientationchange', this._lazyLoadListener.bind(this));
+      this._lazyLoadListener = this._throttle(this._commonLazyLoad, 500).bind(this);
+      document.addEventListener('scroll', this._lazyLoadListener);
+      document.addEventListener('DOMContentLoaded', this._lazyLoadListener);
+      window.addEventListener('resize', this._lazyLoadListener);
+      window.addEventListener('orientationchange', this._lazyLoadListener);
     }
   }
 }
